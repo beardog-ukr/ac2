@@ -3,12 +3,15 @@ package friedBox.app;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
+import friedBox.component.SqliteUpdater;
+//
 // import cottonfalcon.CottonFalcon;
 //
 // import desertCyborg.CourtsArchiveReader;
 //
 //import org.json.simple.parser.JSONParser;
 //import org.json.simple.parser.ParseException;
+
 
 public class MainApp {
 
@@ -26,7 +29,10 @@ public class MainApp {
     // else {
     //   logger.debug("no help message needed"); //
     // }
-    System.out.println("Doing something");
+    SqliteUpdater sup = new SqliteUpdater();
+    sup.say();
+
+
 
     logger.debug("application finished."); //
   }

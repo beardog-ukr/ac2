@@ -1,0 +1,21 @@
+<configuration>
+
+  <appender name="STDOUT"
+   class="ch.qos.logback.core.ConsoleAppender">
+   <encoder>
+     <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level - %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <logger name="dcApp.main" level="DEBUG" />
+  <logger name="dc.car" level="DEBUG" />
+  <logger name="dc.cap" level="DEBUG" />
+
+  <!-- turn OFF all logging (children can override) -->
+  <root level="OFF">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>

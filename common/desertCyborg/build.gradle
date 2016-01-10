@@ -1,0 +1,115 @@
+apply plugin: 'java'
+
+//sourceCompatibility = 1.7
+version = '1.0'
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ["src/main/java/desertCyborg/"]  //
+    }
+    resources {
+      srcDir 'src/main/resources/'
+    }
+  }
+
+  test {
+    java {
+      srcDirs = ["src/test/java/desertCyborg"]  //
+    }
+  }
+
+  dcApp {
+    java {
+      srcDir "src/main/java/dcApp"  //
+      srcDir "src/main/java/desertCyborg/"  //
+    }
+    resources {
+      srcDir 'src/main/resources/'
+    }
+  }
+}
+
+
+task debugJar(type: Jar) {
+  manifest {
+    attributes 'Implementation-Title': 'Desert Cyborg Debug',
+               'Implementation-Version': version
+  }
+
+  baseName = project.name + '-debug'
+  rename('logback-debug.xml', 'logback.xml')
+
+  from sourceSets.main.output
+}
+
+task basicJar(type: Jar) {
+  manifest {
+        attributes 'Implementation-Title': 'Desert Cyborg',
+            'Implementation-Version': version
+  }
+
+  baseName = project.name + '-basic'
+  rename('logback-basic.xml', 'logback.xml')
+
+  from sourceSets.main.output
+}
+
+task appJar(type: Jar) {
+  manifest {
+        attributes 'Implementation-Title': 'Desert Cyborg',
+        	'Implementation-Version': version,
+        	'Main-Class': 'dcApp.MainApp'
+  }
+
+  baseName = project.name + '-app'
+  rename('logback-debug.xml', 'logback.xml')
+
+  from sourceSets.dcApp.output
+  from {
+    configurations.dcAppRuntime.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+}
+
+
+jar.dependsOn('debugJar')
+jar.dependsOn('basicJar')
+jar.dependsOn('appJar')
+
+//
+repositories {
+  flatDir {
+    dirs 'lib/production/cottonfalcon'
+    dirs 'lib/production/logback-classic'
+    dirs 'lib/production/json-simple'
+    dirs 'lib/development/junit'
+  }
+}
+
+//Project dependencies
+dependencies {
+  compile name: 'logback-classic', version:'1.1.3'
+  compile name: 'slf4j-api', version:'1.7.7'
+  compile name: 'json-simple', version:'1.1.1'
+  compile name: 'cottonfalcon', version:'0.0.2'
+
+  testCompile name: 'junit', version: '4.10'
+
+  testRuntime name: 'junit', version: '4.10'
+  testRuntime name: 'hamcrest-core', version: '1.3'
+  testRuntime name: 'json-simple', version:'1.1.1'
+  testRuntime name: 'logback-classic', version:'1.1.3'
+  testRuntime name: 'slf4j-api', version:'1.7.7'
+  testRuntime name: 'logback-core', version:'1.1.3'
+
+  dcAppCompile name: 'logback-classic', version:'1.1.3'
+  dcAppCompile name: 'slf4j-api', version:'1.7.7'
+  dcAppCompile name: 'cottonfalcon', version:'0.0.2'
+  dcAppCompile name: 'json-simple', version:'1.1.1'
+
+  dcAppRuntime name: 'logback-classic', version:'1.1.3'
+  dcAppRuntime name: 'slf4j-api', version:'1.7.7'
+  dcAppRuntime name: 'logback-core', version:'1.1.3'
+  dcAppRuntime name: 'cottonfalcon', version:'0.0.2'
+  dcAppRuntime name: 'json-simple', version:'1.1.1'
+}

@@ -1,28 +1,37 @@
-package desertCyborg;
+package dcApp;
 
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.json.simple.parser.ContentHandler;
+import cottonfalcon.CottonFalcon;
 //
-import java.util.ArrayList;
-//
-// import org.slf4j.LoggerFactory;
-// import ch.qos.logback.classic.Level;
-// import ch.qos.logback.classic.Logger;
+import desertCyborg.CourtsArchiveReader;
 
-public class CourtsArchiveParserTest {
+/**
+ * Test application class.
+ *
+ * Uses hardcoded test string to test desertCyborg package classes.
+ *
+ * Created on 10.01.16.
+ */
+public class TestAppA {
 
-  // ==========================================================================
+  private static final Logger logger = LoggerFactory.getLogger("dcApp.main");
 
+  public void doIt(String[] args) {
+    CottonFalcon cf = new CottonFalcon();
+    cf.addShortOption("h", false);
+    boolean cfpr = cf.process(args);
+    if (cf.gotShortOption("h")) {
+      logger.debug("need to show help message"); //
+    }
+    else {
+      logger.debug("no help message needed"); //
+    }
 
+    CourtsArchiveReader car = new CourtsArchiveReader();
+    //car.readFile("dd"); //no file reading here
 
-  // ==========================================================================
-
-  @Test
-  public void testBasic() {
 
     String td = "";
     td += "{\n";
@@ -56,28 +65,9 @@ public class CourtsArchiveParserTest {
     td += "]";
     td += "} ";
 
+    car.processJSON(td);
 
 
-    JSONParser parser = new JSONParser();
-    CourtsArchiveParser cap = new CourtsArchiveParser();
-    ContentHandler ch = cap;
-    try {
-      parser.parse(td, ch);
-    }
-    catch(ParseException pe){
-       pe.printStackTrace();
-    }
-
-    assertEquals(cap.numberOfCases(), 2);
-    ArrayList<CaseItem> items = cap.getItems();
-    assertEquals(items.size(), 2);
-    assertEquals("338/1797/15-а", items.get(0).getNumber());
-    assertEquals(items.get(1).getNumber(), "338/1670/15-ц");
-    assertEquals(items.get(1).getJudge(), "Круль І.В.");
-
+    //logger.debug("application finished."); //
   }
-
-  // ==========================================================================
-
-  // ==========================================================================
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 class CourtsArchiveParser implements ContentHandler{
 
-  private static final Logger logger = LoggerFactory.getLogger("dc.cap");
+  private static final Logger logger = LoggerFactory.getLogger("desertCyborg");
 
   enum ProcessingStage{
     START
@@ -246,7 +246,7 @@ class CourtsArchiveParser implements ContentHandler{
         currentCaseItem.setNumber(stringValue);
         break;
       case RCI_INVOLVED:
-        currentCaseItem.setNumber(stringValue);
+        currentCaseItem.setInvolved(stringValue);
         break;
       case RCI_DESC:
         currentCaseItem.setDescription(stringValue);

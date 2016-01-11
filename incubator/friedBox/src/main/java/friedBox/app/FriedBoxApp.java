@@ -4,6 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
 import cottonfalcon.CottonFalcon;
+//
+import desertCyborg.CourtsArchiveReader;
+import desertCyborg.CaseItem;
+//
+import java.util.ArrayList;
 
 /**
  * Main class of the FriedBox app.
@@ -79,6 +84,16 @@ public class FriedBoxApp {
       return false;
     }
 
+    CourtsArchiveReader car = new CourtsArchiveReader();
+    boolean readResult = car.readFile(jsonFileName); //
+    if (!readResult) {
+      logger.error("failed to read file : " + car.getErrorMessage());
+      return false;
+    }
+
+    ArrayList<CaseItem> items = car.getItems();
+    String dmsg = String.format("Got %d items", items.size());
+    logger.debug(dmsg);
 
 
     return true;

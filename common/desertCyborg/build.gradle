@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 //sourceCompatibility = 1.7
-version = '1.0'
+version = '0.0.1'
 
 sourceSets {
   main {
@@ -37,7 +37,7 @@ task debugJar(type: Jar) {
                'Implementation-Version': version
   }
 
-  baseName = project.name + '-debug'
+  baseName = 'desert-cyborg-debug'
   rename('logback-debug.xml', 'logback.xml')
 
   from sourceSets.main.output
@@ -49,7 +49,7 @@ task basicJar(type: Jar) {
             'Implementation-Version': version
   }
 
-  baseName = project.name + '-basic'
+  baseName = 'desert-cyborg-basic'
   rename('logback-basic.xml', 'logback.xml')
 
   from sourceSets.main.output

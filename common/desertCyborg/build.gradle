@@ -50,7 +50,8 @@ task basicJar(type: Jar) {
   }
 
   baseName = 'desert-cyborg-basic'
-  rename('logback-basic.xml', 'logback.xml')
+  exclude('logback-basic.xml')
+  exclude('logback-debug.xml')
 
   from sourceSets.main.output
 }

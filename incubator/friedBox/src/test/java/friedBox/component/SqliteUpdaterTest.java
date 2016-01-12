@@ -6,9 +6,9 @@ import static org.junit.Assert.*;
 public class SqliteUpdaterTest {
 
   @Test
-  public void testConcatenate() {
+  public void testErrorMessageNoError() {
     SqliteUpdater su = new SqliteUpdater();
-    String result = su.concatenate("one", "two");
-    assertEquals("onetwo", result);
+    String result = su.getErrorMessage();
+    assertEquals("", result);
   }
 }

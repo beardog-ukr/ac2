@@ -9,6 +9,8 @@ import desertCyborg.CourtsArchiveReader;
 import desertCyborg.CaseItem;
 //
 import java.util.ArrayList;
+//
+import friedBox.component.SqliteUpdater;
 
 /**
  * Main class of the FriedBox app.
@@ -92,9 +94,24 @@ public class FriedBoxApp {
     }
 
     ArrayList<CaseItem> items = car.getItems();
-    String dmsg = String.format("Got %d items", items.size());
-    logger.debug(dmsg);
+    logger.debug( String.format("Got %d items", items.size()) );
 
+    SqliteUpdater sup = new SqliteUpdater();
+    sup.setCourtId("ss.dd");
+
+    if (!sup.connectToDB(dbFileName)) {
+      logger.error(sup.getErrorMessage());
+      return false;
+    }
+
+    for (CaseItem ci:items) {
+      if (!sup.addOneItem(ci)) {
+        logger.error(sup.getErrorMessage());
+        break;
+      }
+    }
+
+    sup.finish();
 
     return true;
   }

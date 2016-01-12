@@ -86,6 +86,12 @@ public class FriedBoxApp {
       return false;
     }
 
+    String courtId = CourtIdExtractor.extract(jsonFileName);
+    if (courtId.isEmpty()) {
+      logger.error("Failed to extract court if from json filename");
+      return false;
+    }
+
     CourtsArchiveReader car = new CourtsArchiveReader();
     boolean readResult = car.readFile(jsonFileName); //
     if (!readResult) {
@@ -97,7 +103,7 @@ public class FriedBoxApp {
     logger.debug( String.format("Got %d items", items.size()) );
 
     SqliteUpdater sup = new SqliteUpdater();
-    sup.setCourtId("ss.dd");
+    sup.setCourtId(courtId);
 
     if (!sup.connectToDB(dbFileName)) {
       logger.error(sup.getErrorMessage());

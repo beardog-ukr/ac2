@@ -16,7 +16,8 @@ sourceSets {
 
   test {
     java {
-      srcDirs = ["src/test/java/friedBox/component"]  //
+      srcDirs = ["src/test/java/friedBox/component"
+                ,"src/test/java/friedBox/app"]  //
     }
   }
 }

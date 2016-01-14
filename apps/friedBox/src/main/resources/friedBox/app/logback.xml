@@ -9,9 +9,9 @@
     </encoder>
   </appender>
 
-  <logger name="friedBox.app" level="DEBUG" />
-  <logger name="friedBox.dbA" level="DEBUG" />
-  <logger name="friedBox.dbB" level="DEBUG" />
+  <logger name="friedBox.app" level="WARN" />
+  <logger name="friedBox.dbA" level="WARN" />
+  <logger name="friedBox.dbB" level="WARN" />
 
   <!-- turn OFF all logging (children can override) -->
   <root level="OFF">

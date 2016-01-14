@@ -24,7 +24,10 @@ public class FriedBoxApp {
 
   protected void printHelpMessage() {
     System.out.println("Application accepts following options:");
-    System.out.println("-h or --help    Show this message and exit");
+    System.out.println("-h or --help              Show this message and exit");
+    System.out.println("-l or --loglevel [level]  Change loggilg level. " +
+                       "Possible values are \"DEBUG\", \"INFO\", \"WARN\"" +
+                       "and \"ERROR\". Default is \"WARN\". ");
     System.out.println("--" + dbFileNameOption
                             + "    Sqlite database file name; mandatory");
     System.out.println("--" + jsonFileNameOption
@@ -40,6 +43,10 @@ public class FriedBoxApp {
     cf.addLongOption("db", true);
     cf.addLongOption("json", true);
 
+    final String logLevelShCO = "l";
+    final String logLevelLCO = "loglevel";
+    cf.addOption(logLevelShCO, logLevelLCO, true);
+
     boolean cfpr = cf.process(args);
     if (!cfpr) {
       System.out.println("Error: "+ cf.getErrorMessage());
@@ -54,6 +61,23 @@ public class FriedBoxApp {
       return false;
     }
 
+    if (cf.gotShortOption(logLevelShCO)||cf.gotLongOption(logLevelLCO)) {
+      String desiredLogLevel = cf.getOptionParameter(logLevelShCO, logLevelLCO);
+      if (desiredLogLevel.equals("DEBUG")) {
+        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+      } else if (desiredLogLevel.equals("INFO")) {
+        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.INFO);
+      } else if (desiredLogLevel.equals("WARN")) {
+        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.WARN);
+      } else if (desiredLogLevel.equals("ERROR")) {
+        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.ERROR);
+      }
+      else {
+        System.out.println("Error: unknown logging level.");
+        return false ;
+      }
+      logger.warn("Log level changed to {}.", desiredLogLevel);
+    }
 
     if (cf.gotLongOption(dbFileNameOption)) {
       dbFileName = cf.getLongOptionParameter(dbFileNameOption);

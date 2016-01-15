@@ -6,7 +6,9 @@ apply plugin: 'java'
 // 0.0.1 : initial
 // 0.0.2 : with command line option for changing log level
 // 0.0.3 : built with cottonfalcon-0.0.3
-version = '0.0.3'
+//         first attempt to work with database
+// 0.0.4 : added support for sqlite4java
+version = '0.0.4'
 
 sourceSets {
   main {
@@ -52,6 +54,7 @@ repositories {
     dirs 'lib/production/logback-classic'
     dirs 'lib/production/json-simple'
     dirs 'lib/production/sqlite-jdbc'
+    dirs 'lib/production/sqlite4java'
     dirs 'lib/development/junit'
   }
 }
@@ -64,6 +67,7 @@ dependencies {
   // compile name: 'json-simple', version:'1.1.1'
   compile name: 'cottonfalcon', version:'0.0.3'
   compile name: 'desert-cyborg-basic', version:'0.0.1'
+  compile name: 'sqlite4java', version: '1.0.392'
 
   testCompile name: 'junit', version: '4.10'
 
@@ -79,6 +83,7 @@ dependencies {
   runtime name: 'slf4j-api', version:'1.7.7'
   runtime name: 'logback-core', version:'1.1.3'
   runtime name: 'sqlite-jdbc', version:'3.8.11.2'
+  runtime name: 'sqlite4java', version: '1.0.392'
   runtime name: 'cottonfalcon', version:'0.0.3'
   runtime name: 'desert-cyborg-basic', version:'0.0.1'
   runtime name: 'json-simple', version:'1.1.1'

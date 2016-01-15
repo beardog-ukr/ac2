@@ -1,5 +1,6 @@
 package friedBox.app;
 
+import friedBox.component.NativeUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
@@ -11,6 +12,7 @@ import desertCyborg.CaseItem;
 import java.util.ArrayList;
 //
 import friedBox.component.SqliteUpdater;
+import friedBox.component.NativeUpdater;
 
 /**
  * Main class of the FriedBox app.
@@ -21,6 +23,11 @@ public class FriedBoxApp {
 
   static final String dbFileNameOption = "db";
   static final String jsonFileNameOption = "json";
+  static final String logLevelShCO = "l";
+  static final String logLevelLCO = "loglevel";
+  static final String dbUpdaterShCO = "u";
+  static final String dbUpdaterLCO = "updater";
+
 
   protected void printHelpMessage() {
     System.out.println("Application accepts following options:");
@@ -28,6 +35,9 @@ public class FriedBoxApp {
     System.out.println("-l or --loglevel [level]  Change loggilg level. " +
                        "Possible values are \"DEBUG\", \"INFO\", \"WARN\"" +
                        "and \"ERROR\". Default is \"WARN\". ");
+    System.out.println("-" + dbUpdaterShCO + " or --" + dbUpdaterLCO + "[name]"+
+                       "Set DB updater component. Possible values are \"jdbc\""+
+                       "(default) and \"native\".");
     System.out.println("--" + dbFileNameOption
                             + "    Sqlite database file name; mandatory");
     System.out.println("--" + jsonFileNameOption
@@ -43,9 +53,9 @@ public class FriedBoxApp {
     cf.addLongOption("db", true);
     cf.addLongOption("json", true);
 
-    final String logLevelShCO = "l";
-    final String logLevelLCO = "loglevel";
     cf.addOption(logLevelShCO, logLevelLCO, true);
+
+    cf.addOption(dbUpdaterShCO, dbUpdaterLCO, true);
 
     boolean cfpr = cf.process(args);
     if (!cfpr) {
@@ -61,6 +71,7 @@ public class FriedBoxApp {
       return false;
     }
 
+    //--
     if (cf.gotShortOption(logLevelShCO)||cf.gotLongOption(logLevelLCO)) {
       String desiredLogLevel = cf.getOptionParameter(logLevelShCO, logLevelLCO);
       if (desiredLogLevel.equals("DEBUG")) {
@@ -76,7 +87,26 @@ public class FriedBoxApp {
         System.out.println("Error: unknown logging level.");
         return false ;
       }
-      logger.warn("Log level changed to {}.", desiredLogLevel);
+      //logger.warn("Log level changed to {}.", desiredLogLevel);
+    }
+
+    //--
+    if (cf.gotShortOption(dbUpdaterShCO)||cf.gotLongOption(dbUpdaterLCO) ) {
+      String dbcode = cf.getOptionParameter(dbUpdaterShCO, dbUpdaterLCO) ;
+      if (dbcode.equals("jdbc")) {
+        dbUpdater = new SqliteUpdater();
+      }
+      else if (dbcode.equals("native")) {
+        dbUpdater = new NativeUpdater();
+        logger.debug("Now will use sqlite4java updater (native)");
+      } else {
+        logger.error("Unknown dbupdater name \"{}\"");
+        return false;
+      }
+    }
+    else {
+      logger.debug("Use default DB updater.");
+      dbUpdater = new SqliteUpdater();
     }
 
     if (cf.gotLongOption(dbFileNameOption)) {
@@ -99,6 +129,9 @@ public class FriedBoxApp {
     return true;
   }
 
+  DbUpdater dbUpdater = null;
+
+
   /**
    * Performs all required actions.
    * @param args   command line arguments, as in "main".
@@ -112,7 +145,7 @@ public class FriedBoxApp {
 
     String courtId = CourtIdExtractor.extract(jsonFileName);
     if (courtId.isEmpty()) {
-      logger.error("Failed to extract court if from json filename");
+      logger.error("Failed to extract court if from json filename {}", jsonFileName);
       return false;
     }
 
@@ -126,22 +159,21 @@ public class FriedBoxApp {
     ArrayList<CaseItem> items = car.getItems();
     logger.debug( String.format("Got %d items", items.size()) );
 
-    SqliteUpdater sup = new SqliteUpdater();
-    sup.setCourtId(courtId);
+    dbUpdater.setCourtId(courtId);
 
-    if (!sup.connectToDB(dbFileName)) {
-      logger.error(sup.getErrorMessage());
+    if (!dbUpdater.connectToDB(dbFileName)) {
+      logger.error(dbUpdater.getErrorMessage());
       return false;
     }
 
     for (CaseItem ci:items) {
-      if (!sup.addOneItem(ci)) {
-        logger.error(sup.getErrorMessage());
+      if (!dbUpdater.addOneItem(ci)) {
+        logger.error(dbUpdater.getErrorMessage());
         break;
       }
     }
 
-    sup.finish();
+    dbUpdater.finish();
 
     return true;
   }

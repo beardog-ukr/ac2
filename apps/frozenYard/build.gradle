@@ -42,9 +42,9 @@ jar {
 repositories {
   flatDir {
     dirs 'lib/production/cottonfalcon'
-    //dirs 'lib/production/desert-cyborg'
+    dirs 'lib/production/desert-cyborg'
     dirs 'lib/production/logback-classic'
-    //dirs 'lib/production/json-simple'
+    dirs 'lib/production/json-simple'
     //dirs 'lib/production/sqlite-jdbc'
     //dirs 'lib/production/sqlite4java'
     //dirs 'lib/production/sqljet'
@@ -59,7 +59,7 @@ dependencies {
   compile name: 'logback-core', version:'1.1.3'
   // compile name: 'json-simple', version:'1.1.1'
   compile name: 'cottonfalcon', version:'0.0.3'
-  //compile name: 'desert-cyborg-basic', version:'0.0.1'
+  compile name: 'desert-cyborg-basic', version:'0.0.1'
   //compile name: 'sqlite4java', version: '1.0.392'
   //compile name: 'sqljet', version: '1.1.10'
 
@@ -80,7 +80,7 @@ dependencies {
   //runtime name: 'sqlite4java', version: '1.0.392'
   //runtime name: 'sqljet', version: '1.1.10'
   runtime name: 'cottonfalcon', version:'0.0.3'
-  //runtime name: 'desert-cyborg-basic', version:'0.0.1'
-  //runtime name: 'json-simple', version:'1.1.1'
+  runtime name: 'desert-cyborg-basic', version:'0.0.1'
+  runtime name: 'json-simple', version:'1.1.1'
 
 }

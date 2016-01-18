@@ -7,6 +7,9 @@ import cottonfalcon.CottonFalcon;
 //
 //import java.util.ArrayList;
 //
+import java.io.File;
+//
+import desertCyborg.CourtsArchiveReader;
 
 /**
  * Main class of the FrozenYard app.
@@ -16,10 +19,11 @@ public class FrozenYardApp {
   private static final Logger logger = LoggerFactory.getLogger("frozenYard.app");
 
   static final String dbFileNameOption = "db";
-  //static final String jsonFileNameOption = "json";
+  static final String jsonFileNameOption = "json";
   static final String logLevelShCO = "l";
   static final String logLevelLCO = "loglevel";
 
+  String errorMessage = "";
 
   protected void printHelpMessage() {
     System.out.println("Application accepts following options:");
@@ -29,14 +33,18 @@ public class FrozenYardApp {
                        "and \"ERROR\". Default is \"WARN\". ");
     System.out.println("--" + dbFileNameOption
                             + "    Sqlite database file name; mandatory");
+    System.out.println("--" + jsonFileNameOption
+            + "    JSON file name; mandatory");
   }
 
   String dbFileName = "";
+  String jsonFileName = "";
 
   protected boolean proccessArgs(String[] args) {
     CottonFalcon cf = new CottonFalcon();
     cf.addOption("h", "help", false);
-    cf.addLongOption("db", true);
+    cf.addLongOption(dbFileNameOption, true);
+    cf.addLongOption(jsonFileNameOption, true);
 
     cf.addOption(logLevelShCO, logLevelLCO, true);
 
@@ -68,7 +76,7 @@ public class FrozenYardApp {
         ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.ERROR);
       }
       else {
-        System.out.println("Error: unknown logging level.");
+        logger.error("Error: unknown logging level \"{}\"", desiredLogLevel);
         return false ;
       }
       //logger.warn("Log level changed to {}.", desiredLogLevel);
@@ -76,6 +84,14 @@ public class FrozenYardApp {
 
     if (cf.gotLongOption(dbFileNameOption)) {
       dbFileName = cf.getLongOptionParameter(dbFileNameOption);
+    }
+    else {
+      logger.error("Error: please specify db name.");
+      return false;
+    }
+
+    if (cf.gotLongOption(jsonFileNameOption)) {
+      jsonFileName = cf.getLongOptionParameter(jsonFileNameOption);
     }
     else {
       logger.error("Error: please specify db name.");
@@ -97,24 +113,62 @@ public class FrozenYardApp {
       return false;
     }
 
+    if (!performBasicCheck(dbFileName)) {
+      logger.error(errorMessage) ;
+      return false;
+    }
+
+    if (!performBasicCheck(jsonFileName)) {
+      logger.error(errorMessage) ;
+      return false;
+    }
+
+    CourtsArchiveReader car = new CourtsArchiveReader();
+    boolean readResult = car.readFile(jsonFileName); //
+    if (!readResult) {
+       logger.error("failed to read file : " + car.getErrorMessage());
+       return false;
+    }
+    logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
+
+
     // String courtId = CourtIdExtractor.extract(jsonFileName);
     // if (courtId.isEmpty()) {
     //   logger.error("Failed to extract court if from json filename {}", jsonFileName);
     //   return false;
     // }
     //
-    // CourtsArchiveReader car = new CourtsArchiveReader();
-    // boolean readResult = car.readFile(jsonFileName); //
-    // if (!readResult) {
-    //   logger.error("failed to read file : " + car.getErrorMessage());
-    //   return false;
-    // }
+
 
     //ArrayList<CaseItem> items = car.getItems();
     //logger.debug( String.format("Got %d items", items.size()) );
 
     logger.debug("Done something");
 
+    return true;
+  }
+
+  boolean performBasicCheck(String dbFileName) {
+    File fl = new File(dbFileName);
+    if (!fl.exists()) {
+      errorMessage = String.format("File \"%s\" does not exist", dbFileName);
+      return false;
+    }
+    else  {
+      logger.debug("File {} exists", dbFileName);
+    }
+
+    if (!fl.canRead()) {
+      errorMessage = String.format("Can\'t read file \"%s\".", dbFileName);
+      return false;
+    }
+
+    if (!fl.canWrite()) {
+      errorMessage = String.format("Can\'t write to file \"%s\".", dbFileName);
+      return false;
+    }
+
+    //finally, normally
     return true;
   }
 

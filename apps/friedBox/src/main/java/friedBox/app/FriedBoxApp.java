@@ -13,6 +13,7 @@ import java.util.ArrayList;
 //
 import friedBox.component.SqliteUpdater;
 import friedBox.component.NativeUpdater;
+import friedBox.component.JetUpdater;
 
 /**
  * Main class of the FriedBox app.

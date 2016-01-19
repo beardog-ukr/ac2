@@ -123,13 +123,21 @@ public class FrozenYardApp {
       return false;
     }
 
-    CourtsArchiveReader car = new CourtsArchiveReader();
-    boolean readResult = car.readFile(jsonFileName); //
-    if (!readResult) {
-       logger.error("failed to read file : " + car.getErrorMessage());
-       return false;
+    //jsonFileName = "not.real.another.foobar.json" ;
+    if (!performProcessedFilesCheck()) {
+      logger.error(errorMessage);
+      return false;
     }
-    logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
+
+
+
+//    CourtsArchiveReader car = new CourtsArchiveReader();
+//    boolean readResult = car.readFile(jsonFileName); //
+//    if (!readResult) {
+//       logger.error("failed to read file : " + car.getErrorMessage());
+//       return false;
+//    }
+//    logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
 
 
     // String courtId = CourtIdExtractor.extract(jsonFileName);
@@ -166,6 +174,25 @@ public class FrozenYardApp {
     if (!fl.canWrite()) {
       errorMessage = String.format("Can\'t write to file \"%s\".", dbFileName);
       return false;
+    }
+
+    //finally, normally
+    return true;
+  }
+
+  boolean performProcessedFilesCheck() {
+    FilesTableProcessor filestp = new FilesTableProcessor(dbFileName);
+    if (filestp.readFilesInfo()){
+      if (filestp.wasProcessed(jsonFileName)) {
+        errorMessage=String.format("File %s already was processed for %s",
+                                   jsonFileName, dbFileName);
+        return false;
+      }
+    }
+    else {
+      errorMessage="Failed to read processed files list from " + dbFileName;
+      errorMessage+= " (" + filestp.getErrorMessage() + ")";
+      return false;//
     }
 
     //finally, normally

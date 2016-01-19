@@ -18,6 +18,9 @@ else
   exit
 fi
 
+cat ./integtest/db/test.sql | sqlite3 $dbFileName
+
+
 execStr="java -jar ./build/libs/frozenYard-0.0.1.jar "
 execStr=${execStr}" --json ./integtest/shortfiles/s2015111_234339.bg.if.json "
 execStr=${execStr}" --db $dbFileName "

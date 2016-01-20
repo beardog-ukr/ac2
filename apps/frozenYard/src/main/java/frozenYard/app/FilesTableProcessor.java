@@ -13,11 +13,8 @@ import org.slf4j.LoggerFactory;
 //
 import org.tmatesoft.sqljet.core.SqlJetException;
 import org.tmatesoft.sqljet.core.SqlJetTransactionMode;
-//import org.tmatesoft.sqljet.core.schema.ISqlJetIndexDef;
-//import org.tmatesoft.sqljet.core.schema.ISqlJetTableDef;
 import org.tmatesoft.sqljet.core.table.ISqlJetCursor;
 import org.tmatesoft.sqljet.core.table.ISqlJetTable;
-//import org.tmatesoft.sqljet.core.table.ISqlJetTransaction;
 import org.tmatesoft.sqljet.core.table.SqlJetDb;
 
 public class FilesTableProcessor {
@@ -63,7 +60,7 @@ public class FilesTableProcessor {
       return false;
     }
 
-    filesInfo = new LinkedList<FileInfo>();
+    filesInfo = new LinkedList<>();
 
     boolean result = true;
     try {
@@ -90,9 +87,6 @@ public class FilesTableProcessor {
 
             filesInfo.add(finfo);
           } while (cursor.next());
-        } else {
-          errorMessage = "Failed to read files table";
-          result = false;
         }
       } catch (SqlJetException e) {
         errorMessage = e.getClass().getName() + ": " + e.getMessage();

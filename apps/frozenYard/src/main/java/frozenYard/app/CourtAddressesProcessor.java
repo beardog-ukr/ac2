@@ -42,30 +42,7 @@ public class CourtAddressesProcessor {
     return errorMessage;
   }
 
-  Map<String, Long> addr2rowid = null;
 
-  /**
-   *   Returns row id for given court address. This id should be used in "cases"
-   * table.
-   * @param addr Court Address
-   * @return
-   */
-  public long getRowid(String addr) {
-    if (addr2rowid==null) {
-      return -1;
-    }
-
-    Long l = addr2rowid.get(addr) ;
-    long result = -1;
-    if (l!=null) {
-      result = l.longValue();
-    }
-    else {
-      logger.error("Unknown court {}", addr);
-    }
-
-    return result;
-  }
 
   /**
    *   Creates unique list of court addresses mentioned in case items.
@@ -136,7 +113,7 @@ public class CourtAddressesProcessor {
             String currentCourtId = cursor.getString("court_id");
             if (courtId.equals(currentCourtId)) {
               String currentAddr = cursor.getString("court_address");
-              for (Map.Entry<String,Boolean> me : a2m.entrySet()) {
+              for (Map.Entry<String, Boolean> me : a2m.entrySet()) {
                 if (currentAddr.equals(me.getKey())) {
                   me.setValue(new Boolean(true));
                   logger.debug("Address {} exists in db", currentAddr);
@@ -144,9 +121,6 @@ public class CourtAddressesProcessor {
               }
             }
           } while (cursor.next());
-        } else {
-          errorMessage = "Failed to read court addresses table (first time)";
-          result = false;
         }
       } catch (SqlJetException e) {
         errorMessage = e.getClass().getName() + ": " + e.getMessage();
@@ -226,7 +200,7 @@ public class CourtAddressesProcessor {
     return result;
   }
 
-  boolean prepareRowidInfo(LinkedList<String> addresses) {
+  boolean prepareRowidInfo(LinkedList<String> addresses, CourtRowIdKeeper rowidKeeper) {
     SqlJetDb database ;
     ISqlJetTable caTable ;
 
@@ -238,8 +212,6 @@ public class CourtAddressesProcessor {
       errorMessage = e.getClass().getName() + ": " + e.getMessage() ;
       return false;
     }
-
-    addr2rowid = new HashMap<>();
 
     boolean result = true;
     try {
@@ -268,7 +240,7 @@ public class CourtAddressesProcessor {
               }
               if (found) {
                 Long lv = new Long(cursor.getRowId());
-                addr2rowid.put(currentAddr, lv);
+                rowidKeeper.addPair(currentAddr, lv);
                 logger.debug("Adding to map {} as {} ", currentAddr, lv);
               }
             }
@@ -291,12 +263,12 @@ public class CourtAddressesProcessor {
       result = false;
     }
 
-    if (addresses.size() != addr2rowid.size()) {
+    if (addresses.size() != rowidKeeper.size()) {
       logger.warn("Some court addresses were not processed {} / {}"
-                  , addresses.size(), addr2rowid.size());
-      for (Map.Entry me: addr2rowid.entrySet()) {
-        logger.debug("Map: {} -> {}", me.getKey(), me.getValue());
-      }
+                  , addresses.size(), rowidKeeper.size());
+//      for (Map.Entry me: rowidKeeper.entrySet()) {
+//        logger.debug("Map: {} -> {}", me.getKey(), me.getValue());
+//      }
     }
 
 
@@ -304,7 +276,7 @@ public class CourtAddressesProcessor {
     return result;
   }
 
-  public boolean processItems(ArrayList<CaseItem> items) {
+  public boolean processItems(ArrayList<CaseItem> items, CourtRowIdKeeper rc) {
     boolean result = true;
     //
     LinkedList<String> usedAddresses = loadUsedCourts(items);
@@ -321,11 +293,9 @@ public class CourtAddressesProcessor {
     }
 
     // now reload list of courts (only for used)
-    if (!prepareRowidInfo(usedAddresses)) {
+    if (!prepareRowidInfo(usedAddresses, rc)) {
       return false;
     }
-
-
 
     return result;
   }

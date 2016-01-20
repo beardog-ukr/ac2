@@ -40,4 +40,10 @@ public class FilenameProcessingTest {
     String s1 = FilenameProcessing.extractFilename("/ddd/fffff/s201512_234340.bg.ig.json");
     assertEquals("s201512_234340.bg.ig.json", s1);
   }
+
+  @Test
+  public void testGetFilename2() {
+    String s1 = FilenameProcessing.extractFilename("s201512_234340.bg.ig.json");
+    assertEquals("s201512_234340.bg.ig.json", s1);
+  }
 }

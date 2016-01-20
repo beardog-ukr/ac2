@@ -18,8 +18,15 @@ else
   exit
 fi
 
-cat ./integtest/db/test.sql | sqlite3 $dbFileName
+#cat ./integtest/db/test.sql | sqlite3 $dbFileName
 
+
+execStr="java -jar ./build/libs/frozenYard-0.0.1.jar "
+execStr=${execStr}" --json ./integtest/shortfiles/s2015110_234339.bg.if.json "
+execStr=${execStr}" --db $dbFileName "
+execStr=${execStr}" -l DEBUG"
+
+time ${execStr}
 
 execStr="java -jar ./build/libs/frozenYard-0.0.1.jar "
 execStr=${execStr}" --json ./integtest/shortfiles/s2015111_234339.bg.if.json "
@@ -28,4 +35,16 @@ execStr=${execStr}" -l DEBUG"
 
 time ${execStr}
 
+execStr="java -jar ./build/libs/frozenYard-0.0.1.jar "
+execStr=${execStr}" --json ./integtest/shortfiles/s201605_23478.pc.ki.json "
+execStr=${execStr}" --db $dbFileName "
+execStr=${execStr}" -l DEBUG"
 
+time ${execStr}
+
+execStr="java -jar ./build/libs/frozenYard-0.0.1.jar "
+execStr=${execStr}" --json ./integtest/shortfiles/s201605_23507.ks.ko.json "
+execStr=${execStr}" --db $dbFileName "
+execStr=${execStr}" -l DEBUG"
+
+time ${execStr}

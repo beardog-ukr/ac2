@@ -10,6 +10,7 @@ import cottonfalcon.CottonFalcon;
 //
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 //
 import desertCyborg.CourtsArchiveReader;
 
@@ -142,8 +143,24 @@ public class FrozenYardApp {
     logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
 
     CourtAddressesProcessor addressesProc = new CourtAddressesProcessor(jsonFileName, dbFileName);
-    if (!addressesProc.processItems(caseItems)) {
+    CourtRowIdKeeper crik = new CourtRowIdKeeper();
+    if (!addressesProc.processItems(caseItems, crik)) {
       logger.error(addressesProc.getErrorMessage());
+      return false;
+    }
+
+    CasesFilter casesFilter = new CasesFilter(dbFileName);
+    LinkedList<CaseItem> newItems = new LinkedList<>();
+    if (!casesFilter.filterItems(caseItems, newItems)) {
+      logger.error(casesFilter.getErrorMessage()) ;
+      return false;
+    }
+
+    logger.debug("Finally has to add {} cases", newItems.size());
+
+    CasesAdder adder = new CasesAdder(dbFileName);
+    if (!adder.addItemsToDb(newItems, jsonFileName, crik)) {
+      logger.error(adder.getErrorMessage()) ;
       return false;
     }
 

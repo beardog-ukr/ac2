@@ -1,5 +1,8 @@
 package frozenYard.app;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+//
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 //
@@ -42,5 +45,18 @@ class FilenameProcessing {
   public static String extractFilename(String filename) {
     Path path = Paths.get(filename) ;
     return path.getFileName().toString();
+  }
+
+  static final String DATETIMEFORMAT = "yyyy-MM-dd HH:mm:ss" ;
+
+  /**
+   * Converts given date to string used in databases
+   * @param date
+   * @return
+   */
+  public static String dateToDbFormat(Date date) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIMEFORMAT);
+    String result = dateFormat.format(date);
+    return result ;
   }
 }

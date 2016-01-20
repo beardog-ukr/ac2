@@ -1,5 +1,6 @@
 package frozenYard.app;
 
+import desertCyborg.CaseItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
@@ -8,6 +9,7 @@ import cottonfalcon.CottonFalcon;
 //import java.util.ArrayList;
 //
 import java.io.File;
+import java.util.ArrayList;
 //
 import desertCyborg.CourtsArchiveReader;
 
@@ -129,27 +131,21 @@ public class FrozenYardApp {
       return false;
     }
 
+    CourtsArchiveReader car = new CourtsArchiveReader();
+    boolean readResult = car.readFile(jsonFileName); //
+    if (!readResult) {
+       logger.error("failed to read json : " + car.getErrorMessage());
+       return false;
+    }
 
+    ArrayList<CaseItem> caseItems = car.getItems();
+    logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
 
-//    CourtsArchiveReader car = new CourtsArchiveReader();
-//    boolean readResult = car.readFile(jsonFileName); //
-//    if (!readResult) {
-//       logger.error("failed to read file : " + car.getErrorMessage());
-//       return false;
-//    }
-//    logger.debug(String.format("Got \"%d\" items in json file", car.getItems().size()));
-
-
-    // String courtId = CourtIdExtractor.extract(jsonFileName);
-    // if (courtId.isEmpty()) {
-    //   logger.error("Failed to extract court if from json filename {}", jsonFileName);
-    //   return false;
-    // }
-    //
-
-
-    //ArrayList<CaseItem> items = car.getItems();
-    //logger.debug( String.format("Got %d items", items.size()) );
+    CourtAddressesProcessor addressesProc = new CourtAddressesProcessor(jsonFileName, dbFileName);
+    if (!addressesProc.processItems(caseItems)) {
+      logger.error(addressesProc.getErrorMessage());
+      return false;
+    }
 
     logger.debug("Done something");
 

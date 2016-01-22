@@ -10,6 +10,7 @@
   </appender>
 
   <logger name="gleeFarm.app" level="DEBUG" />
+  <logger name="gleeFarm.component" level="WARN" />
 
   <!-- turn OFF all logging (children can override) -->
   <root level="OFF">

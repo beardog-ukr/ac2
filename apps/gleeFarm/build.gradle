@@ -9,7 +9,8 @@ version = '0.0.1'
 sourceSets {
   main {
     java {
-      srcDirs = ["src/main/java/gleeFarm/app/", "src/main/java/gleeFarm/app/"]  //
+      srcDirs = ["src/main/java/gleeFarm/app/",
+                 "src/main/java/gleeFarm/component/"]  //
     }
     resources {
       srcDir 'src/main/resources/gleeFarm/app/'
@@ -43,8 +44,7 @@ repositories {
   flatDir {
     dirs 'lib/production/cottonfalcon'
     dirs 'lib/production/logback-classic'
-//    dirs 'lib/production/json-simple'
-
+    dirs 'lib/production/json-simple'
 //    dirs 'lib/development/junit'
   }
 }
@@ -55,6 +55,8 @@ dependencies {
   compile name: 'logback-classic', version:'1.1.3'
   compile name: 'slf4j-api', version:'1.7.7'
   compile name: 'logback-core', version:'1.1.3'
+  //
+  compile name: 'json-simple', version:'1.1.1'
   //other
   compile name: 'cottonfalcon', version:'0.0.3'
   // compile name: 'desert-cyborg-basic', version:'0.0.1'
@@ -80,7 +82,7 @@ dependencies {
   // runtime name: 'antlr-runtime', version:'3.4'
   // //desert cyborg (read json court files)
   // runtime name: 'desert-cyborg-basic', version:'0.0.1'
-  // runtime name: 'json-simple', version:'1.1.1'
+  runtime name: 'json-simple', version:'1.1.1'
   //other
   runtime name: 'cottonfalcon', version:'0.0.3'
 

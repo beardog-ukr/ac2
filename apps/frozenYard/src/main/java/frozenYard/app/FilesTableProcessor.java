@@ -47,6 +47,10 @@ public class FilesTableProcessor {
   }
   LinkedList<FileInfo> filesInfo;
 
+  /**
+   *   Reads "files" table from DB.
+   * @return true on success
+   */
   public boolean readFilesInfo() {
     SqlJetDb database = null;
     ISqlJetTable filesTable = null;
@@ -113,6 +117,12 @@ public class FilesTableProcessor {
     return result;
   }
 
+  /**
+   *    Checks if given filename in "files" table of the DB.
+   *   Can receive full path filenames.
+   * @param filename
+   * @return  true if filename was processed before (was found in the db)
+   */
   public boolean wasProcessed(String filename) {
     if (filesInfo==null) {
       logger.error("There is no list of files");

@@ -179,13 +179,16 @@ public class CourtAddressesProcessor {
       return false;
     }
 
+    String debugNa = "default";
     try {
       for (String na: newAddresses) {
+        debugNa = na;
         caTable.insert(null, courtId, na);// null goes instead of autoincrement integer field
         logger.debug("Adding {} to db", na);
       }
     } catch (SqlJetException e) {
-      errorMessage = e.getClass().getName() + ": " + e.getMessage();
+      errorMessage = e.getClass().getName() + ": " + e.getMessage() + " for " +
+                     debugNa;
       result = false;
     }
 

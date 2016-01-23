@@ -9,11 +9,13 @@ public class MainApp {
   private static final Logger logger = LoggerFactory.getLogger("frozenYard.app");
 
   public static void main(String[] args) {
-    logger.debug("application started"); //
+//    logger.debug("application started"); //
 
     FrozenYardApp fya = new FrozenYardApp();
-    fya.doIt(args);
+    if (!fya.doIt(args)) {
+      logger.error(fya.getErrorMessage());
+    }
 
-    logger.debug("application finished."); //
+//    logger.debug("application finished."); //
   }
 }

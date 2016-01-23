@@ -4,7 +4,8 @@ apply plugin: 'java'
 
 // Versions:
 // 0.0.1 : initial
-version = '0.0.1'
+// 0.0.2 : ability to process lists of files
+version = '0.0.2'
 
 sourceSets {
   main {

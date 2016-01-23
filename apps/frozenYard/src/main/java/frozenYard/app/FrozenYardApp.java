@@ -4,13 +4,17 @@ import desertCyborg.CaseItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //
-import cottonfalcon.CottonFalcon;
-//
 //import java.util.ArrayList;
 //
 import java.io.File;
+import java.util.Date;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
+//
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 //
 import desertCyborg.CourtsArchiveReader;
 
@@ -18,124 +22,23 @@ import desertCyborg.CourtsArchiveReader;
  * Main class of the FrozenYard app.
  */
 public class FrozenYardApp {
-
   private static final Logger logger = LoggerFactory.getLogger("frozenYard.app");
 
-  static final String dbFileNameOption = "db";
-  static final String jsonFileNameOption = "json";
-  static final String logLevelShCO = "l";
-  static final String logLevelLCO = "loglevel";
-
   String errorMessage = "";
-
-  protected void printHelpMessage() {
-    System.out.println("Application accepts following options:");
-    System.out.println("-h or --help              Show this message and exit");
-    System.out.println("-l or --loglevel [level]  Change loggilg level. " +
-                       "Possible values are \"DEBUG\", \"INFO\", \"WARN\"" +
-                       "and \"ERROR\". Default is \"WARN\". ");
-    System.out.println("--" + dbFileNameOption
-                            + "    Sqlite database file name; mandatory");
-    System.out.println("--" + jsonFileNameOption
-            + "    JSON file name; mandatory");
+  String getErrorMessage() {
+    return errorMessage;
   }
 
-  String dbFileName = "";
-  String jsonFileName = "";
+  boolean processOneFile(String dbFileName, String jsonFileName) {
 
-  protected boolean proccessArgs(String[] args) {
-    CottonFalcon cf = new CottonFalcon();
-    cf.addOption("h", "help", false);
-    cf.addLongOption(dbFileNameOption, true);
-    cf.addLongOption(jsonFileNameOption, true);
-
-    cf.addOption(logLevelShCO, logLevelLCO, true);
-
-
-    boolean cfpr = cf.process(args);
-    if (!cfpr) {
-      System.out.println("Error: "+ cf.getErrorMessage());
-      System.out.println("");
-      printHelpMessage();
-      return  false;
-    }
-
-    if (cf.gotShortOption("h")||cf.gotLongOption("help")) {
-      logger.debug("need to show help message"); //
-      printHelpMessage();
-      return false;
-    }
-
-    //--
-    if (cf.gotShortOption(logLevelShCO)||cf.gotLongOption(logLevelLCO)) {
-      String desiredLogLevel = cf.getOptionParameter(logLevelShCO, logLevelLCO);
-      if (desiredLogLevel.equals("DEBUG")) {
-        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-      } else if (desiredLogLevel.equals("INFO")) {
-        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.INFO);
-      } else if (desiredLogLevel.equals("WARN")) {
-        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.WARN);
-      } else if (desiredLogLevel.equals("ERROR")) {
-        ((ch.qos.logback.classic.Logger)logger).setLevel(ch.qos.logback.classic.Level.ERROR);
-      }
-      else {
-        logger.error("Error: unknown logging level \"{}\"", desiredLogLevel);
-        return false ;
-      }
-      //logger.warn("Log level changed to {}.", desiredLogLevel);
-    }
-
-    if (cf.gotLongOption(dbFileNameOption)) {
-      dbFileName = cf.getLongOptionParameter(dbFileNameOption);
-    }
-    else {
-      logger.error("Error: please specify db name.");
-      return false;
-    }
-
-    if (cf.gotLongOption(jsonFileNameOption)) {
-      jsonFileName = cf.getLongOptionParameter(jsonFileNameOption);
-    }
-    else {
-      logger.error("Error: please specify db name.");
-      return false;
-    }
-
-    //finally
-    return true;
-  }
-
-  /**
-   * Performs all required actions.
-   * @param args   command line arguments, as in "main".
-   * @return true on success, false on some error.
-   */
-  public boolean doIt(String[] args) {
-
-    if (!proccessArgs(args)) {
-      return false;
-    }
-
-    if (!performBasicCheck(dbFileName)) {
-      logger.error(errorMessage) ;
-      return false;
-    }
-
-    if (!performBasicCheck(jsonFileName)) {
-      logger.error(errorMessage) ;
-      return false;
-    }
-
-    //jsonFileName = "not.real.another.foobar.json" ;
-    if (!performProcessedFilesCheck()) {
-      logger.error(errorMessage);
+    if (!performProcessedFilesCheck(dbFileName, jsonFileName)) {
       return false;
     }
 
     CourtsArchiveReader car = new CourtsArchiveReader();
     boolean readResult = car.readFile(jsonFileName); //
     if (!readResult) {
-       logger.error("failed to read json : " + car.getErrorMessage());
+       errorMessage = "failed to read json : " + car.getErrorMessage();
        return false;
     }
 
@@ -145,14 +48,14 @@ public class FrozenYardApp {
     CourtAddressesProcessor addressesProc = new CourtAddressesProcessor(jsonFileName, dbFileName);
     CourtRowIdKeeper crik = new CourtRowIdKeeper();
     if (!addressesProc.processItems(caseItems, crik)) {
-      logger.error(addressesProc.getErrorMessage());
+      errorMessage = addressesProc.getErrorMessage();
       return false;
     }
 
     CasesFilter casesFilter = new CasesFilter(dbFileName);
     LinkedList<CaseItem> newItems = new LinkedList<>();
     if (!casesFilter.filterItems(caseItems, newItems)) {
-      logger.error(casesFilter.getErrorMessage()) ;
+      errorMessage = casesFilter.getErrorMessage() ;
       return false;
     }
 
@@ -162,6 +65,95 @@ public class FrozenYardApp {
     if (!adder.addItemsToDb(newItems, jsonFileName, crik)) {
       logger.error(adder.getErrorMessage()) ;
       return false;
+    }
+
+    return true;
+  }
+
+  /**
+   *    Loads list of files to be processed.
+   *    Reads the list from file (if it was specified) and/or adds one filename
+   * specified with "single file" option.
+   * @param listFilename  Filename of a text file, this file should contain
+   *                     a list of files that should be processed
+   * @param singleFilename
+   * @return null on failure, list of files as result
+   */
+  List<String> prepareListOfFilesToProcess(String listFilename, String singleFilename) {
+    List<String> result= new LinkedList<>();
+
+    if (!performBasicCheck(listFilename)) {
+      return null;
+    }
+
+    if (!listFilename.isEmpty()) {
+      try {
+        FileReader fileReader = new FileReader(listFilename);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+          result.add(line);
+        }
+
+        bufferedReader.close();
+      } catch (IOException ex) {
+        errorMessage = "Error reading file '" + listFilename + "'";
+        return null;
+        // ex.printStackTrace();
+      }
+    }
+
+    if ((!singleFilename.isEmpty()) && performBasicCheck(singleFilename)) {
+      result.add(singleFilename);
+    }
+
+    return result;
+  }
+
+  /**
+   * Performs all required actions.
+   * @param args   command line arguments, as in "main".
+   * @return true on success, false on some error.
+   */
+  public boolean doIt(String[] args) {
+
+    CmdArgsResults cmdOptions = CmdArgsProcessing.proccessArgs(args);
+    if (cmdOptions.error) {
+      errorMessage = cmdOptions.errorMessage;
+      return false;
+    }
+
+    if (cmdOptions.showHelp) {
+      CmdArgsProcessing.printHelpMessage();
+      return true;
+    }
+
+//    if (!jsonFileName.isEmpty()) {
+//      if (!performBasicCheck(jsonFileName)) {
+//        logger.error(errorMessage);
+//        return false;
+//      }
+//    }
+//
+//    if (!fileListFileName.isEmpty()) {
+//      if (!performBasicCheck(fileListFileName)) {
+//        logger.error(errorMessage);
+//        return false;
+//      }
+//    }
+
+    List<String> filesToProcess = prepareListOfFilesToProcess(
+                         cmdOptions.fileListFileName, cmdOptions.jsonFileName);
+    if (filesToProcess.isEmpty()) {
+      errorMessage = "Nothing to load";
+      return false;
+    }
+
+    for (String fn:filesToProcess) {
+      logger.info("Processing " + fn +
+                   FilenameProcessing.dateToDbFormat(new Date()));
+      processOneFile(cmdOptions.dbFileName, fn);
     }
 
     logger.debug("Done something");
@@ -193,7 +185,7 @@ public class FrozenYardApp {
     return true;
   }
 
-  boolean performProcessedFilesCheck() {
+  boolean performProcessedFilesCheck(String dbFileName, String jsonFileName) {
     FilesTableProcessor filestp = new FilesTableProcessor(dbFileName);
     if (filestp.readFilesInfo()){
       if (filestp.wasProcessed(jsonFileName)) {
